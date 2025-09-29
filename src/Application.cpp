@@ -36,12 +36,15 @@ void Application::Run()
 	// Main Application loop
 	while (m_Running)
 	{
-		while (const std::optional event = m_Window->GetWindow().pollEvent())
+		while (std::optional event = m_Window->GetWindow().pollEvent())
 		{
 			if (event->is<sf::Event::Closed>())
 			{
 				m_Window->Destroy();
 			}
+
+			for (const std::unique_ptr<Layer>& layer : m_LayerStack)
+				layer->OnEvent(*event);
 		}
 
 		if (m_Window->ShouldClose())
