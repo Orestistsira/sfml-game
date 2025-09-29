@@ -17,6 +17,7 @@ void Window::Create()
 {
 	m_Window = sf::RenderWindow(sf::VideoMode({ m_Specification.Width, m_Specification.Height }), m_Specification.Title);
 	m_Window.setFramerateLimit(144);
+	m_Window.setVerticalSyncEnabled(m_Specification.VSync);
 }
 
 void Window::Destroy()

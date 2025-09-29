@@ -12,5 +12,5 @@ public:
 	virtual void OnEvent(Event& event) {}
 
 	virtual void OnUpdate(sf::Time ts) {}
-	virtual void OnRender() {}
+	virtual void OnRender(sf::RenderWindow& window) {}
 };

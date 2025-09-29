@@ -12,6 +12,8 @@ FetchContent_Declare(SFML
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(game "src/Main.cpp" "src/Window.h" "src/Window.cpp" "src/Application.cpp" "src/Utils.h" "src/Layer.h" "src/Event.h")
+file(COPY res DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+add_executable(game "src/Main.cpp" "src/Window.h" "src/Window.cpp" "src/Application.cpp" "src/Utils.h" "src/Layer.h" "src/Event.h" "src/GameLayer.h" "src/GameLayer.cpp")
 target_compile_features(game PRIVATE cxx_std_20)
 target_link_libraries(game PRIVATE SFML::Graphics SFML::Audio)

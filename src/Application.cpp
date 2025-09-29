@@ -1,7 +1,8 @@
-#include <iostream>
-
 #include "Application.h"
 #include "Utils.h"
+
+#include <iostream>
+#include <algorithm>
 
 static Application* s_Application = nullptr;
 
@@ -49,17 +50,18 @@ void Application::Run()
 			break;
 		}
 
-		sf::Time timestep = clock.restart();
+		sf::Time timestep = GetTimestep(clock);
+
 		UpdateStatistics(timestep);
 
 		// Main layer update here
 		for (const std::unique_ptr<Layer>& layer : m_LayerStack)
 			layer->OnUpdate(timestep);
 
-		// NOTE: rendering can be done elsewhere (eg. render thread)
 		m_Window->Clear();
+		// NOTE: rendering can be done elsewhere (eg. render thread)
 		for (const std::unique_ptr<Layer>& layer : m_LayerStack)
-			layer->OnRender();
+			layer->OnRender(m_Window->GetWindow());
 		m_Window->Update();
 	}
 }
@@ -91,4 +93,15 @@ Application& Application::Get()
 {
 	assert(s_Application);
 	return *s_Application;
+}
+
+sf::Time Application::GetTimestep(sf::Clock& clock)
+{
+	sf::Time timestep = clock.restart();
+	float clamped_timestep = std::clamp(
+		timestep.asSeconds(),
+		0.001f,
+		0.1f
+	);
+	return sf::seconds(clamped_timestep);
 }

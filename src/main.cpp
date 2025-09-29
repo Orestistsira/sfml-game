@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "GameLayer.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -10,5 +11,6 @@ int main()
 	appSpec.WindowSpec.Height = 1080;
 
 	Application game(appSpec);
+	game.PushLayer<GameLayer>();
 	game.Run();
 }

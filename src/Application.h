@@ -32,6 +32,8 @@ public:
 	void UpdateStatistics(sf::Time elapsedTime);
 
 	static Application& Get();
+
+	sf::Time GetTimestep(sf::Clock& clock);
 private:
 	ApplicationSpecification m_Specification;
 	std::shared_ptr<Window> m_Window;
