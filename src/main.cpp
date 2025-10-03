@@ -1,5 +1,7 @@
 #include "Application.h"
 #include "GameLayer.h"
+#include "OverlayLayer.h"
+#include "MenuLayer.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -12,5 +14,7 @@ int main()
 
 	Application game(appSpec);
 	game.PushLayer<GameLayer>();
+	// game.PushLayer<MenuLayer>();
+	game.PushLayer<OverlayLayer>();
 	game.Run();
 }

@@ -1,12 +1,8 @@
 #include "Application.h"
-#include "Utils.h"
 
-#include <iostream>
 #include <algorithm>
 
 static Application* s_Application = nullptr;
-
-const sf::Time Application::m_TimePerFrame = sf::seconds(1.f / 60.f);
 
 Application::Application(const ApplicationSpecification& specification)
 	: m_Specification(specification)
@@ -55,8 +51,6 @@ void Application::Run()
 
 		sf::Time timestep = GetTimestep(clock);
 
-		UpdateStatistics(timestep);
-
 		// Main layer update here
 		for (const std::unique_ptr<Layer>& layer : m_LayerStack)
 			layer->OnUpdate(timestep);
@@ -66,30 +60,16 @@ void Application::Run()
 		for (const std::unique_ptr<Layer>& layer : m_LayerStack)
 			layer->OnRender(m_Window->GetWindow());
 		m_Window->Update();
+
+		// Consume queued layer transitions after frame
+		for (const std::unique_ptr<Layer>& layer : m_LayerStack)
+			layer->ConsumePendingTransition();
 	}
 }
 
 void Application::Stop()
 {
 	m_Running = false;
-}
-
-void Application::UpdateStatistics(sf::Time elapsedTime)
-{
-	m_StatisticsUpdateTime += elapsedTime;
-	m_StatisticsNumFrames += 1;
-
-	if (m_StatisticsUpdateTime >= sf::seconds(1.0f))
-	{
-		std::string stats =
-			"Frames / Second = " + toString(m_StatisticsNumFrames) + "\n" +
-			"Time / Update = " + toString(m_StatisticsUpdateTime.asMicroseconds() / m_StatisticsNumFrames) + "us";
-
-		std::cout << stats << std::endl;
-
-		m_StatisticsUpdateTime -= sf::seconds(1.0f);
-		m_StatisticsNumFrames = 0;
-	}
 }
 
 Application& Application::Get()

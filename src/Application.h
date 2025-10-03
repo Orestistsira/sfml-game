@@ -29,8 +29,6 @@ public:
 		m_LayerStack.push_back(std::make_unique<TLayer>());
 	}
 
-	void UpdateStatistics(sf::Time elapsedTime);
-
 	static Application& Get();
 
 	sf::Time GetTimestep(sf::Clock& clock);
@@ -41,9 +39,5 @@ private:
 
 	std::vector<std::unique_ptr<Layer>> m_LayerStack;
 
-	// Maybe?
-	static const sf::Time m_TimePerFrame;
-
-	sf::Time m_StatisticsUpdateTime;
-	std::size_t m_StatisticsNumFrames = 0;
+	friend class Layer;
 };

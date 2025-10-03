@@ -1,4 +1,5 @@
 #include "GameLayer.h"
+#include "MenuLayer.h"
 
 GameLayer::GameLayer()
 {
@@ -15,6 +16,10 @@ void GameLayer::OnEvent(sf::Event& event)
 
 void GameLayer::OnUpdate(sf::Time ts)
 {
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num1))
+	{
+		TransitionTo<MenuLayer>();
+	}
 	m_Entity.OnUpdate(ts);
 }
 
