@@ -11,7 +11,8 @@ GameLayer::~GameLayer()
 
 void GameLayer::OnEvent(sf::Event& event)
 {
-	m_Entity.OnEvent(event);
+	m_Eagle.OnEvent(event);
+	m_Ball.OnEvent(event);
 }
 
 void GameLayer::OnUpdate(sf::Time ts)
@@ -20,11 +21,13 @@ void GameLayer::OnUpdate(sf::Time ts)
 	{
 		TransitionTo<MenuLayer>();
 	}
-	m_Entity.OnUpdate(ts);
+	m_Eagle.OnUpdate(ts);
+	m_Ball.OnUpdate(ts);
 }
 
 void GameLayer::OnRender(sf::RenderWindow& window)
 {
-	m_Entity.OnRender(window);
+	m_Eagle.OnRender(window);
+	m_Ball.OnRender(window);
 }
 

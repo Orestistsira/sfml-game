@@ -29,9 +29,11 @@ public:
 		m_LayerStack.push_back(std::make_unique<TLayer>());
 	}
 
+	sf::RenderWindow& GetWindow() { return m_Window->GetWindow(); }
+
 	static Application& Get();
 
-	sf::Time GetTimestep(sf::Clock& clock);
+	static sf::Time GetTimestep(sf::Clock& clock);
 private:
 	ApplicationSpecification m_Specification;
 	std::shared_ptr<Window> m_Window;

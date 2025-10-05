@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Layer.h"
-#include "Entity.h"
 
 class MenuLayer : public Layer
 {

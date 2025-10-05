@@ -1,6 +1,6 @@
-#include "Entity.h"
+#include "Eagle.h"
 
-Entity::Entity()
+Eagle::Eagle()
 {
 	if (!m_Texture.loadFromFile("res/textures/Eagle.png"))
 	{
@@ -11,16 +11,16 @@ Entity::Entity()
 	m_Sprite->setPosition({ 10.f, 50.f });
 }
 
-Entity::~Entity()
+Eagle::~Eagle()
 {
 }
 
-void Entity::OnEvent(sf::Event& event)
+void Eagle::OnEvent(sf::Event& event)
 {
 
 }
 
-void Entity::OnUpdate(sf::Time ts)
+void Eagle::OnUpdate(sf::Time ts)
 {
 	const float speed = 200.f; // pixels per second
 
@@ -47,7 +47,7 @@ void Entity::OnUpdate(sf::Time ts)
 		m_Sprite->move(movement * speed * ts.asSeconds());
 }
 
-void Entity::OnRender(sf::RenderWindow& window)
+void Eagle::OnRender(sf::RenderWindow& window)
 {
 	if (m_Sprite)
 		window.draw(*m_Sprite);
