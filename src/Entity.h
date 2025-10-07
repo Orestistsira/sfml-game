@@ -5,7 +5,7 @@
 
 inline const float PIXELS_PER_METER = 100.f;
 inline const float GROUND_HEIGHT = 800.f;
-inline const float FRICTION_COEFF = 30.f;
+inline const float FRICTION_COEFF = 80.f;
 inline const sf::Vector2f GRAVITY = sf::Vector2f(0, 9.81f * PIXELS_PER_METER);
 
 class Entity
@@ -29,8 +29,6 @@ public:
 
 	void SimulatePhysics(sf::Time ts) 
 	{
-		std::cout << "Velocity: (" << m_Velocity.x << ", " << m_Velocity.y << ")\n";
-
 		m_Force += GRAVITY * m_Mass;
 		if (OnGround())
 			m_Force.x -= m_Velocity.x * FRICTION_COEFF;
@@ -48,8 +46,6 @@ public:
 protected:
 	sf::Texture m_Texture;
 	std::optional<sf::Sprite> m_Sprite;
-
-	sf::RectangleShape m_Rectangle;
 
 	sf::Vector2f m_Velocity = sf::Vector2f(0, 0);
 	sf::Vector2f m_Force = sf::Vector2f(0, 0);

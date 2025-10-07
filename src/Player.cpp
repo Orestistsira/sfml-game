@@ -27,7 +27,7 @@ void Player::OnEvent(sf::Event& event)
 void Player::OnUpdate(sf::Time ts)
 {
 	float MOVE_FORCE = 30000.f;
-	float JUMP_FORCE = 3000000.f;
+	float JUMP_FORCE = 3500000.f;
 
 	// Apply horizontal movement
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
