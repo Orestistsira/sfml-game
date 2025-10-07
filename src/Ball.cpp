@@ -33,4 +33,6 @@ void Ball::OnUpdate(sf::Time ts)
 void Ball::OnRender(sf::RenderWindow& window)
 {
 	window.draw(*m_Sprite);
+	auto boundingBox = GetBoundingBox();
+	window.draw(boundingBox);
 }

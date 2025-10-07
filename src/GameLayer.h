@@ -15,6 +15,5 @@ public:
 	virtual void OnUpdate(sf::Time ts) override;
 	virtual void OnRender(sf::RenderWindow& window) override;
 private:
-	Player m_Player;
-	Ball m_Ball;
+	std::vector<std::unique_ptr<Entity>> m_Entities;
 };

@@ -47,4 +47,6 @@ void Player::OnUpdate(sf::Time ts)
 void Player::OnRender(sf::RenderWindow& window)
 {
 	window.draw(*m_Sprite);
+	auto boundingBox = GetBoundingBox();
+	window.draw(boundingBox);
 }

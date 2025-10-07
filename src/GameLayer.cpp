@@ -3,6 +3,8 @@
 
 GameLayer::GameLayer()
 {
+	m_Entities.push_back(std::make_unique<Player>());
+	m_Entities.push_back(std::make_unique<Ball>());
 }
 
 GameLayer::~GameLayer()
@@ -11,8 +13,10 @@ GameLayer::~GameLayer()
 
 void GameLayer::OnEvent(sf::Event& event)
 {
-	m_Player.OnEvent(event);
-	m_Ball.OnEvent(event);
+	for (auto& e : m_Entities)
+	{
+		e->OnEvent(event);
+	}
 }
 
 void GameLayer::OnUpdate(sf::Time ts)
@@ -21,13 +25,18 @@ void GameLayer::OnUpdate(sf::Time ts)
 	{
 		TransitionTo<MenuLayer>();
 	}
-	m_Player.OnUpdate(ts);
-	m_Ball.OnUpdate(ts);
+
+	for (auto& e : m_Entities)
+	{
+		e->OnUpdate(ts);
+	}
 }
 
 void GameLayer::OnRender(sf::RenderWindow& window)
 {
-	m_Player.OnRender(window);
-	m_Ball.OnRender(window);
+	for (auto& e : m_Entities)
+	{
+		e->OnRender(window);
+	}
 }
 
