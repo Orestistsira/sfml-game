@@ -43,12 +43,10 @@ void Eagle::OnUpdate(sf::Time ts)
 		movement /= length; // unit vector
 	}
 
-	if (m_Sprite)
-		m_Sprite->move(movement * speed * ts.asSeconds());
+	m_Sprite->move(movement * speed * ts.asSeconds());
 }
 
 void Eagle::OnRender(sf::RenderWindow& window)
-{
-	if (m_Sprite)
-		window.draw(*m_Sprite);
+{	
+	window.draw(*m_Sprite);
 }

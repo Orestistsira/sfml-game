@@ -1,20 +1,16 @@
 #pragma once
 
-#include "Layer.h"
-#include "Player.h"
-#include "Ball.h"
+#include "Entity.h"
 
-class GameLayer : public Layer
+class Player : public Entity
 {
 public:
-	GameLayer();
-	virtual ~GameLayer();
+	Player();
+	virtual ~Player();
 
 	virtual void OnEvent(sf::Event& event) override;
 
 	virtual void OnUpdate(sf::Time ts) override;
 	virtual void OnRender(sf::RenderWindow& window) override;
 private:
-	Player m_Player;
-	Ball m_Ball;
 };

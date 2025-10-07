@@ -12,7 +12,7 @@ Ball::Ball()
 	m_Sprite->setPosition({ 250.f, 250.f });
 	m_Sprite->setScale({ 0.02, 0.02 });
 
-	m_Mass = 450;
+	m_Mass = 0.43;
 }
 
 Ball::~Ball()
@@ -26,11 +26,11 @@ void Ball::OnEvent(sf::Event& event)
 
 void Ball::OnUpdate(sf::Time ts)
 {
+	HandleGroundCollision();
 	SimulatePhysics(ts);
 }
 
 void Ball::OnRender(sf::RenderWindow& window)
 {
-	if (m_Sprite)
-		window.draw(*m_Sprite);
+	window.draw(*m_Sprite);
 }
