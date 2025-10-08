@@ -1,18 +1,10 @@
 #include "Entity.h"
-
-void Entity::HandleGroundCollision()
-{
-	if (OnGround())
-	{
-		m_Sprite->setPosition({ m_Sprite->getPosition().x, GROUND_HEIGHT });
-		m_Velocity.y = -m_Velocity.y * m_Restitution;
-	}
-}
+#include "Application.h"
 
 void Entity::SimulatePhysics(sf::Time ts)
 {
 	m_Force += GRAVITY * m_Mass;
-	if (OnGround())
+	if (IsOnGround())
 		m_Force.x -= m_Velocity.x * FRICTION_COEFF;
 	m_Velocity += (m_Force / m_Mass) * ts.asSeconds();
 	m_Sprite->move(m_Velocity * ts.asSeconds());
@@ -20,12 +12,20 @@ void Entity::SimulatePhysics(sf::Time ts)
 	m_Force = { 0, 0 };
 }
 
-bool Entity::OnGround() const
+bool Entity::IsOnGround() const
 {
-	return m_Sprite->getPosition().y >= GROUND_HEIGHT;
+	auto& window = Application::Get().GetWindow();
+	auto& worldView = window.getView();
+	auto worldSize = worldView.getSize();
+	return m_Sprite->getPosition().y >= worldSize.y - 100.f - m_Sprite->getSize().y;
 }
 
-sf::RectangleShape Entity::GetBoundingBox() {
+sf::FloatRect Entity::GetBoundingBox() const {
+	return m_Sprite->getGlobalBounds();
+}
+
+sf::RectangleShape Entity::GetBoundingRectangle() const
+{
 	sf::FloatRect boundingBox = m_Sprite->getGlobalBounds();
 	sf::RectangleShape rectangle(boundingBox.size);
 

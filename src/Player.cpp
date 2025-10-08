@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Application.h"
 
 Player::Player()
 {
@@ -8,7 +9,10 @@ Player::Player()
 	}
 
 	m_Texture.setSmooth(true);
-	m_Sprite = sf::Sprite(m_Texture);
+	// m_Sprite = sf::RectangleShape(m_Texture);
+	m_Sprite = std::make_unique<sf::RectangleShape>();
+	m_Sprite->setSize({ 100.f, 100.f });
+	m_Sprite->setTexture(&m_Texture);
 	m_Sprite->setPosition({ 300.f, 550.f });
 
 	m_Mass = 80;
@@ -36,17 +40,21 @@ void Player::OnUpdate(sf::Time ts)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
 		m_Force.x += MOVE_FORCE;
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) 
-		&& m_Sprite->getPosition().y >= GROUND_HEIGHT)
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)
+		&& IsOnGround())
+	{
 		m_Force.y -= JUMP_FORCE;
+		std::cout << "Jump" << std::endl;
+	}
+		
 
-	HandleGroundCollision();
+	// HandleGroundCollision();
 	SimulatePhysics(ts);
 }
 
 void Player::OnRender(sf::RenderWindow& window)
 {
 	window.draw(*m_Sprite);
-	auto boundingBox = GetBoundingBox();
+	auto boundingBox = GetBoundingRectangle();
 	window.draw(boundingBox);
 }

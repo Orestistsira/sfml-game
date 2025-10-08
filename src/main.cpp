@@ -9,8 +9,8 @@ int main()
 {
 	ApplicationSpecification appSpec;
 	appSpec.Name = "Game";
-	appSpec.WindowSpec.Width = 1920;
-	appSpec.WindowSpec.Height = 1080;
+	appSpec.WindowSpec.Width = 1620;
+	appSpec.WindowSpec.Height = 900;
 
 	Application game(appSpec);
 	game.PushLayer<GameLayer>();
