@@ -1,7 +1,7 @@
 #include "Player.h"
 #include "Application.h"
 
-Player::Player()
+Player::Player(sf::Vector2f pos)
 {
 	if (!m_Texture.loadFromFile("res/textures/p1_idle.png"))
 	{
@@ -13,7 +13,7 @@ Player::Player()
 	m_Sprite = std::make_unique<sf::RectangleShape>();
 	m_Sprite->setSize({ 100.f, 100.f });
 	m_Sprite->setTexture(&m_Texture);
-	m_Sprite->setPosition({ 300.f, 550.f });
+	m_Sprite->setPosition(pos);
 
 	m_Mass = 80;
 	m_Restitution = 0;
@@ -40,7 +40,7 @@ void Player::OnUpdate(sf::Time ts)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
 		m_Force.x += MOVE_FORCE;
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)
 		&& IsOnGround())
 	{
 		m_Force.y -= JUMP_FORCE;

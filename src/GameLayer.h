@@ -15,8 +15,10 @@ public:
 	virtual void OnRender(sf::RenderWindow& window) override;
 
 	void ResolveCollisions();
-	void ResolveCollision(Entity& A, Entity& B, sf::FloatRect& intersection);
+	void ResolveDynamicVsDynamicCollision(Entity& A, Entity& B, sf::FloatRect& intersection);
+	void ResolveDynamicVsStaticCollision(Entity& A, Entity& B, sf::FloatRect& intersection);
 private:
-	std::vector<std::unique_ptr<Entity>> m_Entities;
+	std::vector<std::unique_ptr<Entity>> m_StaticEntities;
+	std::vector<std::unique_ptr<Entity>> m_DynamicEntities;
 	sf::View m_WorldView;
 };
