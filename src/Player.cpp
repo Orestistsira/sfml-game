@@ -1,7 +1,8 @@
 #include "Player.h"
 #include "Application.h"
 
-Player::Player(sf::Vector2f pos)
+Player::Player(bool isHome, sf::Vector2f pos)
+	: m_IsHome(isHome)
 {
 	if (!m_Texture.loadFromFile("res/textures/p1_idle.png"))
 	{
@@ -15,8 +16,8 @@ Player::Player(sf::Vector2f pos)
 	m_Sprite->setTexture(&m_Texture);
 	m_Sprite->setPosition(pos);
 
-	m_Mass = 80;
-	m_Restitution = 0;
+	m_InvMass = 0.0125;
+	m_Restitution = 0.6;
 }
 
 Player::~Player()
@@ -33,21 +34,39 @@ void Player::OnUpdate(sf::Time ts)
 	float MOVE_FORCE = 30000.f;
 	float JUMP_FORCE = 3500000.f;
 
-	// Apply horizontal movement
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-		m_Force.x -= MOVE_FORCE;
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-		m_Force.x += MOVE_FORCE;
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)
-		&& IsOnGround())
+	if (m_IsHome)
 	{
-		m_Force.y -= JUMP_FORCE;
-		std::cout << "Jump" << std::endl;
-	}
-		
+		// Apply horizontal movement
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+			m_Force.x -= MOVE_FORCE;
 
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+			m_Force.x += MOVE_FORCE;
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)
+			&& IsOnGround())
+		{
+			m_Force.y -= JUMP_FORCE;
+			std::cout << "Jump" << std::endl;
+		}
+	}
+	else
+	{
+		// Apply horizontal movement
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+			m_Force.x -= MOVE_FORCE;
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+			m_Force.x += MOVE_FORCE;
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)
+			&& IsOnGround())
+		{
+			m_Force.y -= JUMP_FORCE;
+			std::cout << "Jump" << std::endl;
+		}
+	}
+	
 	// HandleGroundCollision();
 	SimulatePhysics(ts);
 }

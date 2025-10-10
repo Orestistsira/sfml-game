@@ -29,10 +29,9 @@ public:
 	std::unique_ptr<sf::RectangleShape> m_Sprite;
 
 	bool m_IsStatic = false;
-	std::vector<sf::Vector2f> m_StaticColNormals;
 
 	sf::Vector2f m_Velocity = sf::Vector2f(0, 0);
 	sf::Vector2f m_Force = sf::Vector2f(0, 0);
-	float m_Mass = 0;
+	float m_InvMass = 0;
 	float m_Restitution = 0.8;
 };

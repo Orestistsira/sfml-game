@@ -14,8 +14,9 @@ Ball::Ball()
 	m_Sprite->setSize({ 50.f, 50.f });
 	m_Sprite->setPosition({ 250.f, 250.f });
 
-	m_Mass = 0.43;
+	m_InvMass = 2.3255;
 	m_Force = { 100000, -100 };
+	m_Restitution = 0.8;
 }
 
 Ball::~Ball()

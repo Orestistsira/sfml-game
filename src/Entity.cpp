@@ -3,10 +3,10 @@
 
 void Entity::SimulatePhysics(sf::Time ts)
 {
-	m_Force += GRAVITY * m_Mass;
+	m_Force += GRAVITY * (1 / m_InvMass);
 	if (IsOnGround())
 		m_Force.x -= m_Velocity.x * FRICTION_COEFF;
-	m_Velocity += (m_Force / m_Mass) * ts.asSeconds();
+	m_Velocity += m_Force * m_InvMass * ts.asSeconds();
 	m_Sprite->move(m_Velocity * ts.asSeconds());
 
 	m_Force = { 0, 0 };

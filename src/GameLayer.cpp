@@ -7,25 +7,25 @@
 
 GameLayer::GameLayer()
 {
-	m_DynamicEntities.push_back(std::make_unique<Player>());
-    // m_DynamicEntities.push_back(std::make_unique<Player>(sf::Vector2f{ 500.f, 550.f }));
-    m_DynamicEntities.push_back(std::make_unique<Ball>());
+    m_Entities.push_back(std::make_unique<Player>());
+    m_Entities.push_back(std::make_unique<Player>(false, sf::Vector2f{ 500.f, 550.f }));
+    m_Entities.push_back(std::make_unique<Ball>());
 
     auto& window = Application::Get().GetWindow();
 
     m_WorldView = window.getDefaultView();
     auto worldSize = m_WorldView.getSize();
 
-    m_StaticEntities.push_back(std::make_unique<Wall>(
+    m_Entities.push_back(std::make_unique<Wall>(
         sf::Vector2f(worldSize.x, 100.f), sf::Vector2f(0.f, worldSize.y - 100.f))); // bottom
 
-    m_StaticEntities.push_back(std::make_unique<Wall>(
+    m_Entities.push_back(std::make_unique<Wall>(
         sf::Vector2f(worldSize.x, 100.f), sf::Vector2f(0.f, 0.f))); // top
 
-    m_StaticEntities.push_back(std::make_unique<Wall>(
+    m_Entities.push_back(std::make_unique<Wall>(
         sf::Vector2f(100.f, worldSize.y), sf::Vector2f(0.f, 0.f))); // left
 
-    m_StaticEntities.push_back(std::make_unique<Wall>(
+    m_Entities.push_back(std::make_unique<Wall>(
         sf::Vector2f(100.f, worldSize.y), sf::Vector2f(worldSize.x - 100.f, 0.f))); // right
 }
 
@@ -43,14 +43,10 @@ void GameLayer::OnEvent(sf::Event& event)
         window.setView(m_WorldView);
     }
 
-	for (auto& e : m_DynamicEntities)
+	for (auto& e : m_Entities)
 	{
 		e->OnEvent(event);
 	}
-    for (auto& e : m_StaticEntities)
-    {
-        e->OnEvent(event);
-    }
 }
 
 void GameLayer::OnUpdate(sf::Time ts)
@@ -62,92 +58,52 @@ void GameLayer::OnUpdate(sf::Time ts)
 
     ResolveCollisions();
 
-	for (auto& e : m_DynamicEntities)
+	for (auto& e : m_Entities)
 	{
 		e->OnUpdate(ts);
 	}
-    for (auto& e : m_StaticEntities)
-    {
-        e->OnUpdate(ts);
-    }
 }
 
 void GameLayer::OnRender(sf::RenderWindow& window)
 {
-	for (auto& e : m_DynamicEntities)
+	for (auto& e : m_Entities)
 	{
 		e->OnRender(window);
 	}
-    for (auto& e : m_StaticEntities)
-    {
-        e->OnRender(window);
-    }
 }
 
 void GameLayer::ResolveCollisions()
 {
-    // std::cout << "ResolveCollisions" << std::endl;
     // Dynamic vs Static collisions
-    for (auto& a : m_DynamicEntities)
+    for (auto& a : m_Entities)
     {
-        for (auto& b : m_StaticEntities)
-        {
-            sf::FloatRect boundsA = a->GetBoundingBox();
-            sf::FloatRect boundsB = b->GetBoundingBox();
-
-            auto intersection = boundsA.findIntersection(boundsB);
-            if (intersection)
-            {
-                // std::cout << "Collision" << std::endl;
-                ResolveDynamicVsStaticCollision(*a, *b, *intersection);
-            }
-        }
-    }
-
-    // Dynamic vs Static collisions
-    for (auto& a : m_DynamicEntities)
-    {
-        for (auto& b : m_DynamicEntities)
+        for (auto& b : m_Entities)
         {
             if (a == b)
                 break;
 
+            if (a->m_IsStatic && b->m_IsStatic)
+                continue;
+
             sf::FloatRect boundsA = a->GetBoundingBox();
             sf::FloatRect boundsB = b->GetBoundingBox();
 
             auto intersection = boundsA.findIntersection(boundsB);
             if (intersection)
             {
-                // std::cout << "Collision" << std::endl;
-                ResolveDynamicVsDynamicCollision(*a, *b, *intersection);
+                ResolveCollision(*a, *b, *intersection);
             }
         }
     }
-
-    // Clear collision normals from dynamic entities
-    for (auto& a : m_DynamicEntities)
-    {
-        a->m_StaticColNormals.clear();
-    }
 }
 
-static bool EntityCanMoveAcrossNormal(Entity& dynamicEntity, sf::Vector2f normal)
-{
-    for (const auto& n : dynamicEntity.m_StaticColNormals)
-    {
-        if (n == -normal)
-            return false;
-    }
-    return true;
-}
-
-struct Collision
+struct Manifold
 {
     sf::Vector2f normal;
     float penetration;
 };
 
-static Collision GetCollision(Entity& a, Entity& b, sf::FloatRect& intersection)
+static Manifold GetCollisionManifold(Entity& a, Entity& b, sf::FloatRect& intersection)
 {
     // Get bounding boxes
     sf::FloatRect aBounds = a.GetBoundingBox();
@@ -180,100 +136,43 @@ static Collision GetCollision(Entity& a, Entity& b, sf::FloatRect& intersection)
             normal = sf::Vector2f(0.f, 1.f);  // a is below b
     }
 
-    return Collision(normal, penetration);
+    return Manifold(normal, penetration);
 }
 
-void GameLayer::ResolveDynamicVsDynamicCollision(Entity& a, Entity& b, sf::FloatRect& intersection)
+void GameLayer::ResolveCollision(Entity& a, Entity& b, sf::FloatRect& intersection)
 {
     if (!a.m_Sprite || !b.m_Sprite)
         return;
 
-    Entity* staticEntity = nullptr;
-    Entity* dynamicEntity = nullptr;
+    auto manifold = GetCollisionManifold(a, b, intersection);
 
-    // --- Case 1: both static -> nothing happens
-    if (a.m_IsStatic || b.m_IsStatic)
-    {
-        throw std::runtime_error("GameLayer::ResolveDynamicVsDynamicCollision - Found a static Entity");
-        return;
-    }
-
-    if (a.m_Mass >= b.m_Mass)
-    {
-        staticEntity = &a;
-        dynamicEntity = &b;
-    }
-    else
-    {
-        staticEntity = &b;
-        dynamicEntity = &a;
-    }
-
-    auto Collision = GetCollision(*dynamicEntity, *staticEntity, intersection);
-
-    if (EntityCanMoveAcrossNormal(*dynamicEntity, Collision.normal))
-    {
-        dynamicEntity->m_Sprite->move(Collision.normal * Collision.penetration);
-    }
-    else
-    {
-        staticEntity->m_Sprite->move(-Collision.normal * Collision.penetration);
-        staticEntity->m_Velocity = 
-            { staticEntity->m_Velocity.x * abs(Collision.normal.y), staticEntity->m_Velocity.y * abs(Collision.normal.x) };
-    }
+    sf::Vector2f rv = b.m_Velocity - a.m_Velocity;
 
     // Reflect velocity along collision normal
-    float vn = dynamicEntity->m_Velocity.x * Collision.normal.x + dynamicEntity->m_Velocity.y * Collision.normal.y;
+    float vn = rv.x * manifold.normal.x + rv.y * manifold.normal.y;
 
-    if (vn < 0.f)
-    {
-        dynamicEntity->m_Velocity -= (1.f + dynamicEntity->m_Restitution) * vn * Collision.normal;
-    }
+    // Do not resolve if velocities are separating 
+    if (vn < 0)
+        return;
+
+    // Calculate restitution 
+    // float e = std::min(a.m_Restitution, b.m_Restitution);
+    float e = a.m_Restitution * b.m_Restitution;
+
+    // Calculate impulse scalar 
+    float j = -(1 + e) * vn;
+    j /= a.m_InvMass + b.m_InvMass;
+
+    // Apply impulse 
+    sf::Vector2f impulse = j * manifold.normal;
+    a.m_Velocity -= a.m_InvMass * impulse;
+    b.m_Velocity += b.m_InvMass * impulse;
+
+    // Positional correction
+    const float percent = 0.2; // usually 20% to 80%
+    const float slop = 0.01; // usually 0.01 to 0.1
+    sf::Vector2f correction = 
+        (std::max(manifold.penetration - slop, 0.0f) / (a.m_InvMass + b.m_InvMass)) * percent * manifold.normal;
+    a.m_Sprite->move(a.m_InvMass * correction);
+    b.m_Sprite->move(-b.m_InvMass * correction);
 }
-
-void GameLayer::ResolveDynamicVsStaticCollision(Entity& a, Entity& b, sf::FloatRect& intersection)
-{
-    if (!a.m_Sprite || !b.m_Sprite)
-        return;
-
-    Entity* staticEntity = nullptr;
-    Entity* dynamicEntity = nullptr;
-
-    // --- Case 1: both static -> nothing happens
-    if (a.m_IsStatic && b.m_IsStatic)
-        return;
-
-    // --- Case 2: one static
-    if (a.m_IsStatic)
-    {
-        staticEntity = &a;
-        dynamicEntity = &b;
-    }
-    else if (b.m_IsStatic)
-    {
-        staticEntity = &b;
-        dynamicEntity = &a;
-    }
-    else
-    {
-        throw std::runtime_error("GameLayer::ResolveDynamicVsStaticCollision - Failed to find a static entity");
-        return;
-    }
-
-    auto Collision = GetCollision(*dynamicEntity, *staticEntity, intersection);
-    dynamicEntity->m_StaticColNormals.push_back(Collision.normal);
-
-    // Separate dynamic entity out of the static one
-    dynamicEntity->m_Sprite->move(Collision.normal * Collision.penetration);
-
-    // Reflect velocity along collision normal
-    float vn = dynamicEntity->m_Velocity.x * Collision.normal.x + dynamicEntity->m_Velocity.y * Collision.normal.y;
-
-    if (vn < 0.f)
-    {
-        dynamicEntity->m_Velocity -= (1.f + dynamicEntity->m_Restitution) * vn * Collision.normal;
-    }
-}
-
-
-

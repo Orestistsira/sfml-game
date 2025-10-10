@@ -7,8 +7,8 @@ Wall::Wall(sf::Vector2f size, sf::Vector2f position)
 	m_Sprite->setSize(size);
 	m_Sprite->setPosition(position);
 
-	m_Mass = 0;
-	m_Restitution = 0;
+	m_InvMass = 0;
+	m_Restitution = 0.5;
 	m_IsStatic = true;
 }
 

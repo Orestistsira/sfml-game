@@ -5,7 +5,7 @@
 class Player : public Entity
 {
 public:
-	Player(sf::Vector2f pos = { 300.f, 550.f });
+	Player(bool isHome = true, sf::Vector2f pos = { 300.f, 550.f });
 	virtual ~Player();
 
 	virtual void OnEvent(sf::Event& event) override;
@@ -13,4 +13,5 @@ public:
 	virtual void OnUpdate(sf::Time ts) override;
 	virtual void OnRender(sf::RenderWindow& window) override;
 private:
+	bool m_IsHome;
 };
