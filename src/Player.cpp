@@ -4,7 +4,9 @@
 Player::Player(bool isHome, sf::Vector2f pos)
 	: m_IsHome(isHome)
 {
-	if (!m_Texture.loadFromFile("res/textures/p1_idle.png"))
+	std::string texturePath = m_IsHome ? "res/textures/p1_idle.png" : "res/textures/p2_idle.png";
+
+	if (!m_Texture.loadFromFile(texturePath))
 	{
 		throw std::runtime_error("Player::Player - Failed to load texture");
 	}
@@ -34,7 +36,7 @@ void Player::OnUpdate(sf::Time ts)
 	float MOVE_FORCE = 30000.f;
 	float JUMP_FORCE = 3500000.f;
 
-	if (m_IsHome)
+	if (!m_IsHome)
 	{
 		// Apply horizontal movement
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
