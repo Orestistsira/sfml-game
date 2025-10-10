@@ -136,7 +136,7 @@ static Manifold GetCollisionManifold(Entity& a, Entity& b, sf::FloatRect& inters
             normal = sf::Vector2f(0.f, 1.f);  // a is below b
     }
 
-    return Manifold(normal, penetration);
+    return Manifold(-normal, penetration);
 }
 
 void GameLayer::ResolveCollision(Entity& a, Entity& b, sf::FloatRect& intersection)
@@ -152,7 +152,7 @@ void GameLayer::ResolveCollision(Entity& a, Entity& b, sf::FloatRect& intersecti
     float vn = rv.x * manifold.normal.x + rv.y * manifold.normal.y;
 
     // Do not resolve if velocities are separating 
-    if (vn < 0)
+    if (vn >= 0)
         return;
 
     // Calculate restitution 
@@ -169,10 +169,10 @@ void GameLayer::ResolveCollision(Entity& a, Entity& b, sf::FloatRect& intersecti
     b.m_Velocity += b.m_InvMass * impulse;
 
     // Positional correction
-    const float percent = 0.2; // usually 20% to 80%
+    const float percent = 0.5; // usually 20% to 80%
     const float slop = 0.01; // usually 0.01 to 0.1
     sf::Vector2f correction = 
         (std::max(manifold.penetration - slop, 0.0f) / (a.m_InvMass + b.m_InvMass)) * percent * manifold.normal;
-    a.m_Sprite->move(a.m_InvMass * correction);
-    b.m_Sprite->move(-b.m_InvMass * correction);
+    a.m_Sprite->move(-a.m_InvMass * correction);
+    b.m_Sprite->move(b.m_InvMass * correction);
 }
