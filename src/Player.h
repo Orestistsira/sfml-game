@@ -12,6 +12,8 @@ public:
 
 	virtual void OnUpdate(sf::Time ts) override;
 	virtual void OnRender(sf::RenderWindow& window) override;
+
+	// TODO: Add CanJump
 private:
 	bool m_IsHome;
 };

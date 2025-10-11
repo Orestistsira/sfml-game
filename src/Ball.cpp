@@ -12,11 +12,13 @@ Ball::Ball()
 	m_Sprite = std::make_unique<sf::RectangleShape>();
 	m_Sprite->setTexture(&m_Texture);
 	m_Sprite->setSize({ 50.f, 50.f });
-	m_Sprite->setPosition({ 250.f, 250.f });
+	m_Sprite->setPosition({ 300.f, 250.f });
 
 	m_InvMass = 2.3255;
-	m_Force = { 100000, -100 };
 	m_Restitution = 0.8;
+	m_Type = EntityType::Ball;
+
+	std::cout << "Ball start pos: " << m_Sprite->getPosition().x << ", " << m_Sprite->getPosition().y << std::endl;
 }
 
 Ball::~Ball()
@@ -30,7 +32,6 @@ void Ball::OnEvent(sf::Event& event)
 
 void Ball::OnUpdate(sf::Time ts)
 {
-	// HandleGroundCollision();
 	SimulatePhysics(ts);
 }
 

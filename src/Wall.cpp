@@ -10,6 +10,7 @@ Wall::Wall(sf::Vector2f size, sf::Vector2f position)
 	m_InvMass = 0;
 	m_Restitution = 0.5;
 	m_IsStatic = true;
+	m_Type = EntityType::Wall;
 }
 
 Wall::~Wall()

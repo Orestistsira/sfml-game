@@ -20,6 +20,7 @@ Player::Player(bool isHome, sf::Vector2f pos)
 
 	m_InvMass = 0.0125;
 	m_Restitution = 0.6;
+	m_Type = EntityType::Player;
 }
 
 Player::~Player()
@@ -65,11 +66,9 @@ void Player::OnUpdate(sf::Time ts)
 			&& IsOnGround())
 		{
 			m_Force.y -= JUMP_FORCE;
-			std::cout << "Jump" << std::endl;
 		}
 	}
 	
-	// HandleGroundCollision();
 	SimulatePhysics(ts);
 }
 

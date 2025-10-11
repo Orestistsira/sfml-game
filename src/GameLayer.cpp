@@ -82,7 +82,10 @@ void GameLayer::ResolveCollisions()
             if (a == b)
                 break;
 
-            if (a->m_IsStatic && b->m_IsStatic)
+            if (!a->HasSprite() || !b->HasSprite())
+                continue;
+
+            if (a->IsStatic() && b->IsStatic())
                 continue;
 
             sf::FloatRect boundsA = a->GetBoundingBox();
@@ -97,6 +100,7 @@ void GameLayer::ResolveCollisions()
     }
 }
 
+// TODO: Add the two Entities in the Manifold
 struct Manifold
 {
     sf::Vector2f normal;
@@ -139,14 +143,12 @@ static Manifold GetCollisionManifold(Entity& a, Entity& b, sf::FloatRect& inters
     return Manifold(-normal, penetration);
 }
 
+// TODO: Pass only the Manifold
 void GameLayer::ResolveCollision(Entity& a, Entity& b, sf::FloatRect& intersection)
 {
-    if (!a.m_Sprite || !b.m_Sprite)
-        return;
-
     auto manifold = GetCollisionManifold(a, b, intersection);
 
-    sf::Vector2f rv = b.m_Velocity - a.m_Velocity;
+    sf::Vector2f rv = b.GetVelocity() - a.GetVelocity();
 
     // Reflect velocity along collision normal
     float vn = rv.x * manifold.normal.x + rv.y * manifold.normal.y;
@@ -157,22 +159,22 @@ void GameLayer::ResolveCollision(Entity& a, Entity& b, sf::FloatRect& intersecti
 
     // Calculate restitution 
     // float e = std::min(a.m_Restitution, b.m_Restitution);
-    float e = a.m_Restitution * b.m_Restitution;
+    float e = a.GetRestitution() * b.GetRestitution();
 
     // Calculate impulse scalar 
     float j = -(1 + e) * vn;
-    j /= a.m_InvMass + b.m_InvMass;
+    j /= a.GetInvMass() + b.GetInvMass();
 
     // Apply impulse 
     sf::Vector2f impulse = j * manifold.normal;
-    a.m_Velocity -= a.m_InvMass * impulse;
-    b.m_Velocity += b.m_InvMass * impulse;
+    a.AddVelocity(-a.GetInvMass() * impulse);
+    b.AddVelocity(b.GetInvMass() * impulse);
 
     // Positional correction
     const float percent = 0.5; // usually 20% to 80%
     const float slop = 0.01; // usually 0.01 to 0.1
     sf::Vector2f correction = 
-        (std::max(manifold.penetration - slop, 0.0f) / (a.m_InvMass + b.m_InvMass)) * percent * manifold.normal;
-    a.m_Sprite->move(-a.m_InvMass * correction);
-    b.m_Sprite->move(b.m_InvMass * correction);
+        (std::max(manifold.penetration - slop, 0.0f) / (a.GetInvMass() + b.GetInvMass())) * percent * manifold.normal;
+    a.Move(-a.GetInvMass() * correction);
+    b.Move(b.GetInvMass() * correction);
 }
