@@ -7,9 +7,12 @@
 
 GameLayer::GameLayer()
 {
-    m_Entities.push_back(std::make_unique<Player>());
-    m_Entities.push_back(std::make_unique<Player>(false, sf::Vector2f{ 500.f, 550.f }));
-    m_Entities.push_back(std::make_unique<Ball>());
+    auto ball = std::make_unique<Ball>();
+    Ball* ballPtr = ball.get();
+    m_Entities.push_back(std::move(ball));
+
+    m_Entities.push_back(std::make_unique<Player>(ballPtr));
+    m_Entities.push_back(std::make_unique<Player>(ballPtr, false, sf::Vector2f{ 500.f, 550.f }));
 
     auto& window = Application::Get().GetWindow();
 
@@ -91,21 +94,21 @@ static Manifold GetCollisionManifold(Entity& a, Entity& b, sf::FloatRect& inters
         // Horizontal collision
         penetration = intersection.size.x;
         if (aCenter.x < bCenter.x)
-            normal = sf::Vector2f(-1.f, 0.f); // a is left of b
+            normal = sf::Vector2f(1.f, 0.f); // a is left of b
         else
-            normal = sf::Vector2f(1.f, 0.f);  // a is right of b
+            normal = sf::Vector2f(-1.f, 0.f);  // a is right of b
     }
     else
     {
         // Vertical collision
         penetration = intersection.size.y;
         if (aCenter.y < bCenter.y)
-            normal = sf::Vector2f(0.f, -1.f); // a is above b
+            normal = sf::Vector2f(0.f, 1.f); // a is above b
         else
-            normal = sf::Vector2f(0.f, 1.f);  // a is below b
+            normal = sf::Vector2f(0.f, -1.f);  // a is below b
     }
 
-    return Manifold(&a, &b, -normal, penetration);
+    return Manifold(&a, &b, normal, penetration);
 }
 
 void GameLayer::ResolveCollisions()
@@ -137,21 +140,48 @@ void GameLayer::ResolveCollisions()
     }
 }
 
-void CheckCollisionEntitiesCanJump(Entity& a, Entity& b, Manifold& manifold)
+void CheckCollisionEntitiesCanJump(Manifold& manifold)
 {
-    if (manifold.normal == sf::Vector2f(0.f, 1.f))
+    Entity& a = *manifold.a;
+    Entity& b = *manifold.b;
+
+    if (a.GetType() == EntityType::Player && manifold.normal == sf::Vector2f(0.f, 1.f))
     {
-        if (a.GetType() == EntityType::Player)
-        {
-            static_cast<Player&>(a).SetCanJump(true);
-        }
+        static_cast<Player&>(a).SetCanJump(true);
     }
-    else if (manifold.normal == sf::Vector2f(0.f, -1.f))
+    else if (b.GetType() == EntityType::Player && manifold.normal == sf::Vector2f(0.f, -1.f))
     {
-        if (b.GetType() == EntityType::Player)
-        {
-            static_cast<Player&>(b).SetCanJump(true);
-        }
+        static_cast<Player&>(b).SetCanJump(true);
+    }
+}
+
+void CheckCollisionEntitiesCanShoot(Manifold& manifold)
+{
+    Entity& a = *manifold.a;
+    Entity& b = *manifold.b;
+
+    Player* player = nullptr;
+    Ball* ball = nullptr;
+
+    if (a.GetType() == EntityType::Player && b.GetType() == EntityType::Ball)
+    {
+        player = dynamic_cast<Player*>(&a);
+        ball = dynamic_cast<Ball*>(&b);
+
+        if (player->IsHome() && manifold.normal == sf::Vector2f(1.f, 0.f))
+            player->SetCanShoot(true);
+        else if (!player->IsHome() && manifold.normal == sf::Vector2f(-1.f, 0.f))
+            player->SetCanShoot(true);
+    }
+    else if (a.GetType() == EntityType::Ball && b.GetType() == EntityType::Player)
+    {
+        ball = dynamic_cast<Ball*>(&a);
+        player = dynamic_cast<Player*>(&b);
+
+        if (!player->IsHome() && manifold.normal == sf::Vector2f(1.f, 0.f))
+            player->SetCanShoot(true);
+        else if (player->IsHome() && manifold.normal == sf::Vector2f(-1.f, 0.f))
+            player->SetCanShoot(true);
     }
 }
 
@@ -159,7 +189,8 @@ void GameLayer::ResolveCollision(Manifold& manifold)
 {
     Entity& a = *manifold.a;
     Entity& b = *manifold.b;
-    CheckCollisionEntitiesCanJump(a, b, manifold);
+    CheckCollisionEntitiesCanJump(manifold);
+    CheckCollisionEntitiesCanShoot(manifold);
 
     sf::Vector2f rv = b.GetVelocity() - a.GetVelocity();
 
@@ -184,7 +215,7 @@ void GameLayer::ResolveCollision(Manifold& manifold)
     b.AddVelocity(b.GetInvMass() * impulse);
 
     // Positional correction
-    const float percent = 0.5; // usually 20% to 80%
+    const float percent = 0.3; // usually 20% to 80%
     const float slop = 0.01; // usually 0.01 to 0.1
     sf::Vector2f correction = 
         (std::max(manifold.penetration - slop, 0.0f) / (a.GetInvMass() + b.GetInvMass())) * percent * manifold.normal;

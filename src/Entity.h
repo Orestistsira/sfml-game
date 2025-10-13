@@ -40,6 +40,7 @@ public:
 
 	void Move(sf::Vector2f offset) const { m_Sprite->move(offset); }
 	void AddVelocity(sf::Vector2f v) { m_Velocity += v; }
+	void ApplyForce(sf::Vector2f f) { m_Force += f; }
 
 	sf::FloatRect GetBoundingBox() const;
 	sf::RectangleShape GetBoundingRectangle() const;

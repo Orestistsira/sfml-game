@@ -1,9 +1,11 @@
 #include "Player.h"
 #include "Application.h"
 
-Player::Player(bool isHome, sf::Vector2f pos)
+Player::Player(Entity* ball, bool isHome, sf::Vector2f pos)
 	: m_IsHome(isHome)
 	, m_CanJump(false)
+	, m_CanShoot(false)
+	, m_Ball(ball)
 {
 	std::string texturePath = m_IsHome ? "res/textures/p1_idle.png" : "res/textures/p2_idle.png";
 
@@ -40,6 +42,7 @@ void Player::OnUpdate(sf::Time ts)
 	SimulatePhysics(ts);
 
 	m_CanJump = false;
+	m_CanShoot = false;
 }
 
 void Player::OnRender(sf::RenderWindow& window)
@@ -53,11 +56,14 @@ void Player::HandleInput()
 {
 	float MOVE_FORCE = 30000.f;
 	float JUMP_FORCE = 3500000.f;
+	float SHOOT_FORCE_X = 10000.f;
+	float SHOOT_FORCE_Y = 10000.f;
 
 	// Select control keys depending on mode
 	sf::Keyboard::Key leftKey = m_IsHome ? sf::Keyboard::Key::A : sf::Keyboard::Key::Left;
 	sf::Keyboard::Key rightKey = m_IsHome ? sf::Keyboard::Key::D : sf::Keyboard::Key::Right;
 	sf::Keyboard::Key jumpKey = m_IsHome ? sf::Keyboard::Key::W : sf::Keyboard::Key::Up;
+	sf::Keyboard::Key shootKey = m_IsHome ? sf::Keyboard::Key::Space : sf::Keyboard::Key::Numpad0;
 
 	// Apply horizontal movement
 	if (sf::Keyboard::isKeyPressed(leftKey))
@@ -68,7 +74,9 @@ void Player::HandleInput()
 
 	// Apply jump
 	if (sf::Keyboard::isKeyPressed(jumpKey) && CanJump())
-	{
 		m_Force.y -= JUMP_FORCE;
-	}
+
+	// Shoot
+	if (sf::Keyboard::isKeyPressed(shootKey) && CanShoot())
+		m_Ball->ApplyForce({ m_IsHome ? SHOOT_FORCE_X : -SHOOT_FORCE_X, -SHOOT_FORCE_Y });
 }
