@@ -17,16 +17,16 @@ GameLayer::GameLayer()
     auto worldSize = m_WorldView.getSize();
 
     m_Entities.push_back(std::make_unique<Wall>(
-        sf::Vector2f(worldSize.x, 100.f), sf::Vector2f(0.f, worldSize.y - 100.f))); // bottom
+        sf::Vector2f(worldSize.x, PIXELS_PER_METER), sf::Vector2f(0.f, worldSize.y - PIXELS_PER_METER))); // bottom
 
     m_Entities.push_back(std::make_unique<Wall>(
-        sf::Vector2f(worldSize.x, 100.f), sf::Vector2f(0.f, 0.f))); // top
+        sf::Vector2f(worldSize.x, PIXELS_PER_METER), sf::Vector2f(0.f, 0.f))); // top
 
     m_Entities.push_back(std::make_unique<Wall>(
-        sf::Vector2f(100.f, worldSize.y), sf::Vector2f(0.f, 0.f))); // left
+        sf::Vector2f(PIXELS_PER_METER, worldSize.y), sf::Vector2f(0.f, 0.f))); // left
 
     m_Entities.push_back(std::make_unique<Wall>(
-        sf::Vector2f(100.f, worldSize.y), sf::Vector2f(worldSize.x - 100.f, 0.f))); // right
+        sf::Vector2f(PIXELS_PER_METER, worldSize.y), sf::Vector2f(worldSize.x - PIXELS_PER_METER, 0.f))); // right
 }
 
 GameLayer::~GameLayer()
@@ -72,41 +72,6 @@ void GameLayer::OnRender(sf::RenderWindow& window)
 	}
 }
 
-void GameLayer::ResolveCollisions()
-{
-    // Dynamic vs Static collisions
-    for (auto& a : m_Entities)
-    {
-        for (auto& b : m_Entities)
-        {
-            if (a == b)
-                break;
-
-            if (!a->HasSprite() || !b->HasSprite())
-                continue;
-
-            if (a->IsStatic() && b->IsStatic())
-                continue;
-
-            sf::FloatRect boundsA = a->GetBoundingBox();
-            sf::FloatRect boundsB = b->GetBoundingBox();
-
-            auto intersection = boundsA.findIntersection(boundsB);
-            if (intersection)
-            {
-                ResolveCollision(*a, *b, *intersection);
-            }
-        }
-    }
-}
-
-// TODO: Add the two Entities in the Manifold
-struct Manifold
-{
-    sf::Vector2f normal;
-    float penetration;
-};
-
 static Manifold GetCollisionManifold(Entity& a, Entity& b, sf::FloatRect& intersection)
 {
     // Get bounding boxes
@@ -140,13 +105,61 @@ static Manifold GetCollisionManifold(Entity& a, Entity& b, sf::FloatRect& inters
             normal = sf::Vector2f(0.f, 1.f);  // a is below b
     }
 
-    return Manifold(-normal, penetration);
+    return Manifold(&a, &b, -normal, penetration);
 }
 
-// TODO: Pass only the Manifold
-void GameLayer::ResolveCollision(Entity& a, Entity& b, sf::FloatRect& intersection)
+void GameLayer::ResolveCollisions()
 {
-    auto manifold = GetCollisionManifold(a, b, intersection);
+    // Dynamic vs Static collisions
+    for (auto& a : m_Entities)
+    {
+        for (auto& b : m_Entities)
+        {
+            if (a == b)
+                break;
+
+            if (!a->HasSprite() || !b->HasSprite())
+                continue;
+
+            if (a->IsStatic() && b->IsStatic())
+                continue;
+
+            sf::FloatRect boundsA = a->GetBoundingBox();
+            sf::FloatRect boundsB = b->GetBoundingBox();
+
+            auto intersection = boundsA.findIntersection(boundsB);
+            if (intersection)
+            {
+                Manifold manifold = GetCollisionManifold(*a, *b, *intersection);
+                ResolveCollision(manifold);
+            }
+        }
+    }
+}
+
+void CheckCollisionEntitiesCanJump(Entity& a, Entity& b, Manifold& manifold)
+{
+    if (manifold.normal == sf::Vector2f(0.f, 1.f))
+    {
+        if (a.GetType() == EntityType::Player)
+        {
+            static_cast<Player&>(a).SetCanJump(true);
+        }
+    }
+    else if (manifold.normal == sf::Vector2f(0.f, -1.f))
+    {
+        if (b.GetType() == EntityType::Player)
+        {
+            static_cast<Player&>(b).SetCanJump(true);
+        }
+    }
+}
+
+void GameLayer::ResolveCollision(Manifold& manifold)
+{
+    Entity& a = *manifold.a;
+    Entity& b = *manifold.b;
+    CheckCollisionEntitiesCanJump(a, b, manifold);
 
     sf::Vector2f rv = b.GetVelocity() - a.GetVelocity();
 

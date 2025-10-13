@@ -13,7 +13,10 @@ public:
 	virtual void OnUpdate(sf::Time ts) override;
 	virtual void OnRender(sf::RenderWindow& window) override;
 
-	// TODO: Add CanJump
+	void HandleInput();
+	bool CanJump() const { return m_CanJump; }
+	void SetCanJump(bool canJump) { m_CanJump = canJump; }
 private:
 	bool m_IsHome;
+	bool m_CanJump;
 };

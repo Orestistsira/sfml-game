@@ -3,6 +3,7 @@
 
 Player::Player(bool isHome, sf::Vector2f pos)
 	: m_IsHome(isHome)
+	, m_CanJump(false)
 {
 	std::string texturePath = m_IsHome ? "res/textures/p1_idle.png" : "res/textures/p2_idle.png";
 
@@ -34,42 +35,11 @@ void Player::OnEvent(sf::Event& event)
 
 void Player::OnUpdate(sf::Time ts)
 {
-	float MOVE_FORCE = 30000.f;
-	float JUMP_FORCE = 3500000.f;
-
-	if (!m_IsHome)
-	{
-		// Apply horizontal movement
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-			m_Force.x -= MOVE_FORCE;
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-			m_Force.x += MOVE_FORCE;
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)
-			&& IsOnGround())
-		{
-			m_Force.y -= JUMP_FORCE;
-			std::cout << "Jump" << std::endl;
-		}
-	}
-	else
-	{
-		// Apply horizontal movement
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-			m_Force.x -= MOVE_FORCE;
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-			m_Force.x += MOVE_FORCE;
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)
-			&& IsOnGround())
-		{
-			m_Force.y -= JUMP_FORCE;
-		}
-	}
+	HandleInput();
 	
 	SimulatePhysics(ts);
+
+	m_CanJump = false;
 }
 
 void Player::OnRender(sf::RenderWindow& window)
@@ -77,4 +47,28 @@ void Player::OnRender(sf::RenderWindow& window)
 	window.draw(*m_Sprite);
 	auto boundingBox = GetBoundingRectangle();
 	window.draw(boundingBox);
+}
+
+void Player::HandleInput()
+{
+	float MOVE_FORCE = 30000.f;
+	float JUMP_FORCE = 3500000.f;
+
+	// Select control keys depending on mode
+	sf::Keyboard::Key leftKey = m_IsHome ? sf::Keyboard::Key::A : sf::Keyboard::Key::Left;
+	sf::Keyboard::Key rightKey = m_IsHome ? sf::Keyboard::Key::D : sf::Keyboard::Key::Right;
+	sf::Keyboard::Key jumpKey = m_IsHome ? sf::Keyboard::Key::W : sf::Keyboard::Key::Up;
+
+	// Apply horizontal movement
+	if (sf::Keyboard::isKeyPressed(leftKey))
+		m_Force.x -= MOVE_FORCE;
+
+	if (sf::Keyboard::isKeyPressed(rightKey))
+		m_Force.x += MOVE_FORCE;
+
+	// Apply jump
+	if (sf::Keyboard::isKeyPressed(jumpKey) && CanJump())
+	{
+		m_Force.y -= JUMP_FORCE;
+	}
 }

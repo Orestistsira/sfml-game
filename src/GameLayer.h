@@ -3,6 +3,14 @@
 #include "Layer.h"
 #include "Entity.h"
 
+struct Manifold
+{
+	Entity* a;
+	Entity* b;
+	sf::Vector2f normal;
+	float penetration;
+};
+
 class GameLayer : public Layer
 {
 public:
@@ -15,7 +23,7 @@ public:
 	virtual void OnRender(sf::RenderWindow& window) override;
 
 	void ResolveCollisions();
-	void ResolveCollision(Entity& A, Entity& B, sf::FloatRect& intersection);
+	void ResolveCollision(Manifold& manifold);
 private:
 	std::vector<std::unique_ptr<Entity>> m_Entities;
 	sf::View m_WorldView;

@@ -17,7 +17,7 @@ bool Entity::IsOnGround() const
 	auto& window = Application::Get().GetWindow();
 	auto& worldView = window.getView();
 	auto worldSize = worldView.getSize();
-	return m_Sprite->getPosition().y >= worldSize.y - 100.f - m_Sprite->getSize().y;
+	return m_Sprite->getPosition().y >= worldSize.y - PIXELS_PER_METER - m_Sprite->getSize().y;
 }
 
 sf::FloatRect Entity::GetBoundingBox() const {
