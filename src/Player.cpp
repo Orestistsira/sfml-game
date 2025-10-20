@@ -22,7 +22,7 @@ Player::Player(std::shared_ptr<Entity> ball, bool isHome, sf::Vector2f pos)
 	m_Sprite->setPosition(pos);
 
 	m_InvMass = 0.0125;
-	m_Restitution = 0.6;
+	m_Restitution = 0.5;
 	m_Type = EntityType::Player;
 }
 

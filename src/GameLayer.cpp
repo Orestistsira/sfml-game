@@ -2,6 +2,7 @@
 #include "MenuLayer.h"
 #include "Player.h"
 #include "Ball.h"
+#include "Goal.h"
 #include "Wall.h"
 #include "Application.h"
 
@@ -29,6 +30,8 @@ GameLayer::GameLayer()
 
     m_Entities.push_back(std::make_shared<Wall>(
         sf::Vector2f(PIXELS_PER_METER, worldSize.y), sf::Vector2f(worldSize.x - PIXELS_PER_METER, 0.f))); // right
+
+    m_Entities.push_back(std::make_shared<Goal>(true));
 }
 
 GameLayer::~GameLayer()

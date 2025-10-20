@@ -26,7 +26,7 @@ sf::FloatRect Entity::GetBoundingBox() const {
 
 sf::RectangleShape Entity::GetBoundingRectangle() const
 {
-	sf::FloatRect boundingBox = m_Sprite->getGlobalBounds();
+	sf::FloatRect boundingBox = GetBoundingBox();
 	sf::RectangleShape rectangle(boundingBox.size);
 
 	rectangle.setPosition(boundingBox.position);

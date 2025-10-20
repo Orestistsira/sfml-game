@@ -11,7 +11,8 @@ enum class EntityType
 {
 	Player = 0,
 	Ball = 1,
-	Wall = 2
+	Wall = 2,
+	Goal = 3
 };
 
 class Entity
@@ -23,6 +24,9 @@ public:
 
 	virtual void OnUpdate(sf::Time ts) {}
 	virtual void OnRender(sf::RenderWindow& window) {}
+
+	virtual sf::FloatRect GetBoundingBox() const;
+	sf::RectangleShape GetBoundingRectangle() const;
 
 	void SimulatePhysics(sf::Time ts);
 
@@ -41,9 +45,6 @@ public:
 	void Move(sf::Vector2f offset) const { m_Sprite->move(offset); }
 	void AddVelocity(sf::Vector2f v) { m_Velocity += v; }
 	void ApplyForce(sf::Vector2f f) { m_Force += f; }
-
-	sf::FloatRect GetBoundingBox() const;
-	sf::RectangleShape GetBoundingRectangle() const;
 
 protected:
 	sf::Texture m_Texture;
