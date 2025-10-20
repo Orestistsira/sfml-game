@@ -7,28 +7,27 @@
 
 GameLayer::GameLayer()
 {
-    auto ball = std::make_unique<Ball>();
-    Ball* ballPtr = ball.get();
-    m_Entities.push_back(std::move(ball));
+    auto ball = std::make_shared<Ball>();
+    m_Entities.push_back(ball);
 
-    m_Entities.push_back(std::make_unique<Player>(ballPtr));
-    m_Entities.push_back(std::make_unique<Player>(ballPtr, false, sf::Vector2f{ 500.f, 550.f }));
+    m_Entities.push_back(std::make_shared<Player>(ball));
+    m_Entities.push_back(std::make_shared<Player>(ball, false, sf::Vector2f{ 500.f, 550.f }));
 
     auto& window = Application::Get().GetWindow();
 
     m_WorldView = window.getDefaultView();
     auto worldSize = m_WorldView.getSize();
 
-    m_Entities.push_back(std::make_unique<Wall>(
+    m_Entities.push_back(std::make_shared<Wall>(
         sf::Vector2f(worldSize.x, PIXELS_PER_METER), sf::Vector2f(0.f, worldSize.y - PIXELS_PER_METER))); // bottom
 
-    m_Entities.push_back(std::make_unique<Wall>(
+    m_Entities.push_back(std::make_shared<Wall>(
         sf::Vector2f(worldSize.x, PIXELS_PER_METER), sf::Vector2f(0.f, 0.f))); // top
 
-    m_Entities.push_back(std::make_unique<Wall>(
+    m_Entities.push_back(std::make_shared<Wall>(
         sf::Vector2f(PIXELS_PER_METER, worldSize.y), sf::Vector2f(0.f, 0.f))); // left
 
-    m_Entities.push_back(std::make_unique<Wall>(
+    m_Entities.push_back(std::make_shared<Wall>(
         sf::Vector2f(PIXELS_PER_METER, worldSize.y), sf::Vector2f(worldSize.x - PIXELS_PER_METER, 0.f))); // right
 }
 

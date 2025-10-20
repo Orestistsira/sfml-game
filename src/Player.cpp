@@ -1,7 +1,7 @@
 #include "Player.h"
 #include "Application.h"
 
-Player::Player(Entity* ball, bool isHome, sf::Vector2f pos)
+Player::Player(std::shared_ptr<Entity> ball, bool isHome, sf::Vector2f pos)
 	: m_IsHome(isHome)
 	, m_CanJump(false)
 	, m_CanShoot(false)

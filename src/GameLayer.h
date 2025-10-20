@@ -25,6 +25,6 @@ public:
 	void ResolveCollisions();
 	void ResolveCollision(Manifold& manifold);
 private:
-	std::vector<std::unique_ptr<Entity>> m_Entities;
+	std::vector<std::shared_ptr<Entity>> m_Entities;
 	sf::View m_WorldView;
 };

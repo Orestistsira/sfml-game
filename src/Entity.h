@@ -50,7 +50,7 @@ protected:
 	std::unique_ptr<sf::RectangleShape> m_Sprite;
 
 	bool m_IsStatic = false;
-	EntityType m_Type;
+	EntityType m_Type = EntityType::Player;
 
 	sf::Vector2f m_Velocity = sf::Vector2f(0, 0);
 	sf::Vector2f m_Force = sf::Vector2f(0, 0);

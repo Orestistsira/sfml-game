@@ -5,7 +5,7 @@
 class Player : public Entity
 {
 public:
-	Player(Entity* ball, bool isHome = true, sf::Vector2f pos = { 300.f, 550.f });
+	Player(std::shared_ptr<Entity> ball, bool isHome = true, sf::Vector2f pos = { 300.f, 550.f });
 	virtual ~Player();
 
 	virtual void OnEvent(sf::Event& event) override;
@@ -27,5 +27,5 @@ private:
 	bool m_CanJump;
 	bool m_CanShoot;
 
-	Entity* m_Ball = nullptr;
+	std::shared_ptr<Entity> m_Ball = nullptr;
 };
